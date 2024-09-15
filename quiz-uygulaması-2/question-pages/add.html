@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../style.css">
+    <title>Soru Ekle</title>
+  </head>
+  <body>
+    <div class="container">
+      <form id="question-form" action="addQuestionToDatabase.php" method="POST">
+        <div class="title">
+            <input type="text"  name="T" id="T" placeholder="Başlık"></div>
+        <div class="question-box">
+          <div class="question"><textarea type="text" name="Q" id="Q" placeholder="Soru"></textarea></div>
+          <div class="options">
+            <div class="group">
+            <div class="option" id="A"><input type="text"  name="A" id="A" placeholder="A"></div>
+            <div class="option" id="B"><input type="text"  name="B" id="B" placeholder="B"></div>
+        </div>
+        <div class="group">
+            <div class="option" id="C"><input type="text"  name="C" id="C" placeholder="C"></div>
+            <div class="option" id="D"><input type="text"  name="D" id="D" placeholder="D"></div>
+        </div>
+          </div>
+        </div>
+        <label for="difficulty">Zorluk</label>
+        <select id="difficulty" name="difficulty">
+            <option value="Kolay">Kolay</option>
+            <option value="Normal">Normal</option>
+            <option value="Zor">Zor</option>
+        </select>
+        
+        <label for="correctAnswer">Doğru Cevap</label>
+        <select id="correctAnswer" name="correctAnswer">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+        </select>
+        
+    
+        <button type="submit">Ekle</button>
+      </form>
+
+      <a href="../admin-panel.php" class="button">Vazgeç</a>
+      <script src="../script.js"></script>
+        <script>
+      
+    </script>
+    </div>
+  </body>
+</html>

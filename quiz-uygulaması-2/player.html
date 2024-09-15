@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <form id="question-form">
+        <div class="title">
+          <input type="text" name="T" id="T" placeholder="Başlık" readonly />
+        </div>
+        <div class="question-box">
+          <div class="question">
+            <textarea name="Q" id="Q" placeholder="Soru" readonly></textarea>
+          </div>
+          <div class="options">
+            <div class="group">
+              <div class="option">
+                <button type="button" id="A" onclick="answer(this.id)"></button>
+              </div>
+              <div class="option">
+                <button type="button" id="B" onclick="answer(this.id)"></button>
+              </div>
+            </div>
+            <div class="group">
+              <div class="option">
+                <button type="button" id="C" onclick="answer(this.id)"></button>
+              </div>
+              <div class="option">
+                <button type="button" id="D" onclick="answer(this.id)"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <label for="difficulty">Zorluk</label>
+        <select id="difficulty" name="difficulty" disabled>
+          <option value="Kolay">Kolay</option>
+          <option value="Normal">Normal</option>
+          <option value="Zor">Zor</option>
+        </select>
+      </form>
+
+      <h2>Toplam Puan: <span id="total-score">0</span></h2>
+      <h2>Kalan Süre: <span id="timer">60</span> saniye</h2>
+    </div>
+
+    <script>
+      var totalScore = 0;
+      var currentQuestion = null;
+      var time;
+      var logs = [];
+
+      function loadQuestion() {
+        fetch('getQuestions.php')
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
+            
+            if (data.length > 0) {
+              var randomIndex = Math.floor(Math.random() * data.length);
+              currentQuestion = data[randomIndex];
+              
+              
+              console.log("Soru:", currentQuestion.question);
+              console.log("Şık A:", currentQuestion.option_a);
+              console.log("Şık B:", currentQuestion.option_b);
+              console.log("Şık C:", currentQuestion.option_c);
+              console.log("Şık D:", currentQuestion.option_d);
+              console.log("Doğru Cevap:", currentQuestion.correct_option);
+              
+              document.getElementById("T").value = currentQuestion.title;
+              document.getElementById("Q").value = currentQuestion.question;
+              document.getElementById("A").innerHTML = currentQuestion.option_a;
+              document.getElementById("B").innerHTML = currentQuestion.option_b;
+              document.getElementById("C").innerHTML = currentQuestion.option_c;
+              document.getElementById("D").innerHTML = currentQuestion.option_d;
+
+              document.getElementById("difficulty").value = currentQuestion.difficulty;
+            } else {
+              alert("Tüm sorular tamamlandı! Toplam Puan: " + totalScore);
+              saveLogsAndScore();
+            }
+          })
+          .catch(error => console.error('Hata:', error));
+      }
+
+      function updateScore(difficulty) {
+        var score = 0;
+        switch (difficulty) {
+          case "Kolay":
+            score = 5;
+            break;
+          case "Normal":
+            score = 10;
+            break;
+          case "Zor":
+            score = 25;
+            break;
+          default:
+            score = 0;
+        }
+        totalScore += score;
+        document.getElementById("total-score").innerText = totalScore;
+      }
+
+      function startTimer(duration) {
+        let timer = duration, seconds;
+        time = setInterval(function () {
+          seconds = parseInt(timer % 60, 10);
+          seconds = seconds < 10 ? "0" + seconds : seconds;
+          document.getElementById("timer").textContent = seconds;
+          if (--timer < 0) {
+            clearInterval(time);
+            alert("Süre doldu! Oyun bitti. Toplam Puan: " + totalScore);
+            saveLogsAndScore();
+          }
+        }, 1000);
+      }
+
+      function answer(selectedOption) {
+        if (currentQuestion) {
+          logs.push({
+            question_id: currentQuestion.id,
+            player_answer: selectedOption,
+          });
+
+          
+          if (selectedOption.toUpperCase() === currentQuestion.correct_option.toUpperCase()) {
+            alert("Doğru cevap!");
+            updateScore(currentQuestion.difficulty);
+            loadQuestion(); 
+          } else {
+            alert("Yanlış cevap! Oyun bitti.");
+            saveLogsAndScore();
+          }
+        } else {
+          alert("Geçerli soru bulunamadı.");
+          saveLogsAndScore();
+        }
+      }
+
+      function saveLogsAndScore() {
+        fetch("saveLogs.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            logs: logs,
+            score: totalScore
+          }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log("Loglar sunucuya gönderildi:", data);
+            window.location.href = "index.php";
+          })
+          .catch(error => console.error("Sunucuya gönderim hatası:", error));
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        startTimer(60);
+        loadQuestion();
+      });
+    </script>
+  </body>
+</html>

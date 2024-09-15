@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../style.css">
+    <title>Soru Düzenle</title>
+  </head>
+  <body>
+    <div class="container">
+      <form id="question-form" action="update-question.php" method="post">
+        <input type="text" id="id" name="id" hidden value="">
+        <div class="title">
+            <input type="text"  name="T" id="T" placeholder="Başlık"></div>
+        <div class="question-box">
+          <div class="question"><textarea type="text" name="Q" id="Q" placeholder="Soru"></textarea></div>
+          <div class="options">
+            <div class="group">
+            <div class="option"><input type="text"  name="A" id="A" placeholder="A"></div>
+            <div class="option"><input type="text"  name="B" id="B" placeholder="B"></div>
+        </div>
+        <div class="group">
+            <div class="option"><input type="text"  name="C" id="C" placeholder="C"></div>
+            <div class="option"><input type="text"  name="D" id="D" placeholder="D"></div>
+        </div>
+          </div>
+        </div>
+        <label for="difficulty">Zorluk</label>
+        <select id="difficulty" name="difficulty">
+            <option value="Kolay">Kolay</option>
+            <option value="Normal">Normal</option>
+            <option value="Zor">Zor</option>
+        </select>
+        
+        <label for="correctAnswer">Doğru Cevap</label>
+        <select id="correctAnswer" name="correctAnswer">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+        </select>
+        
+    
+        <button type="submit">Kaydet</button>
+      </form>
+
+      <a href="../admin-panel.php" class="button">Vazgeç</a>
+      
+      <script>
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function populateForm(question) {
+            console.log(question.optionC);
+            document.getElementById('T').value = question.title;
+            document.getElementById('Q').value = question.question;
+            document.getElementById('A').value = question.optionA;
+            document.getElementById('B').value = question.optionB;
+            document.getElementById('C').value = question.optionC;
+            document.getElementById('D').value = question.optionD;
+            document.getElementById('difficulty').value = question.difficulty;
+            document.getElementById('correctAnswer').value = question.correctOption;
+        }
+
+        function loadQuestion() {
+            const id = getQueryParam('id');
+            if (id !== null) {
+                const questions = JSON.parse(localStorage.getItem('questions')) || [];
+                const question = questions.find(q => q.id == id);
+                if (question) {
+                    populateForm(question);
+                } else {
+                    console.log('Soru bulunamadı');
+                }
+            }
+        }
+
+        function saveQuestion(event) {
+            event.preventDefault(); 
+            const id = getQueryParam('id');
+
+            if (id !== null) {
+                document.getElementById('id').value = id;
+                const questions = JSON.parse(localStorage.getItem('questions')) || [];
+                const questionIndex = questions.findIndex(q => q.id == id);
+
+                if (questionIndex !== -1) {
+                    const updatedQuestion = {
+                        id: parseInt(id, 10),
+                        title: document.getElementById('T').value,
+                        question: document.getElementById('Q').value,
+                        optionA: document.getElementById('A').value,
+                        optionB: document.getElementById('B').value,
+                        optionC: document.getElementById('C').value,
+                        optionD: document.getElementById('D').value,
+                        difficulty: document.getElementById('difficulty').value,
+                        correctOption: document.getElementById('correctAnswer').value,
+                    };
+
+                    
+                    questions[questionIndex] = updatedQuestion;
+                    localStorage.setItem('questions', JSON.stringify(questions));
+
+                    alert('Soru güncellendi');
+                    window.location.href = '../admin-panel.php';
+                } else {
+                    console.log('Soru bulunamadı');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadQuestion);
+        document.getElementById('question-form').addEventListener('submit', saveQuestion);
+    </script>
+    </div>
+  </body>
+</html>
